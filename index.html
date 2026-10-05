@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>말타노트</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* 레이아웃: 가운데 한 단 종이. 형광펜색 머리띠(안내·제호·날짜·헤드라인) 아래로 01~08 번호 섹션이 차례로 이어지고, 맨 아래에 지난 호 목록. 오름=빨강, 내림=파랑(국내 증시 관례). */
+:root{
+  --bg:#e9ecf2; --paper:#ffffff; --soft:#f4f6fa; --ink:#131c2e; --sub:#56617a; --line:#d9dee8;
+  --marker:#ffe45c; --band:#ffe45c; --band-ink:#131c2e; --band-note:#fff3a8;
+  --accent:#1f4fd8; --up:#d92b3a; --down:#1e5fd0; --flat:#6b7385;
+  --up-soft:#fde8ea; --down-soft:#e6eefc; --tip:#fff8d6;
+  --heat-base:#2b3345; --heat-ink:#ffffff; --panel:#1a2233; --panel-ink:#eef1f7; --panel-sub:#a3adc2; --panel-up:#ff7a85; --panel-down:#7fb0ff;
+  --f-display:"Hahmlet","Noto Serif KR",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0b0f18; --paper:#171e2d; --soft:#1e2637; --ink:#e9edf5; --sub:#9aa5bb; --line:#2a3447;
+  --marker:#6b5a00; --band:#e6c93a; --band-ink:#131c2e; --band-note:#f3dd6e;
+  --accent:#8fb0ff; --up:#ff6b78; --down:#6fa2ff; --flat:#9aa5bb;
+  --up-soft:#3a1c22; --down-soft:#17284a; --tip:#2e2a14;
+  --heat-base:#2b3345; --heat-ink:#ffffff; --panel:#0f1522; --panel-ink:#eef1f7; --panel-sub:#a3adc2; --panel-up:#ff7a85; --panel-down:#7fb0ff;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0b0f18; --paper:#171e2d; --soft:#1e2637; --ink:#e9edf5; --sub:#9aa5bb; --line:#2a3447;
+  --marker:#6b5a00; --band:#e6c93a; --band-ink:#131c2e; --band-note:#f3dd6e;
+  --accent:#8fb0ff; --up:#ff6b78; --down:#6fa2ff; --flat:#9aa5bb;
+  --up-soft:#3a1c22; --down-soft:#17284a; --tip:#2e2a14;
+  --heat-base:#2b3345; --heat-ink:#ffffff; --panel:#0f1522; --panel-ink:#eef1f7; --panel-sub:#a3adc2; --panel-up:#ff7a85; --panel-down:#7fb0ff;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.75;padding-inline:16px;padding-block:24px 72px;word-break:keep-all}
+p,h1,h2,h3,h4,ul{margin:0}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+.small{font-size:12.5px;color:var(--sub)}
+.center{text-align:center}
+
+.sheet{max-width:720px;margin:0 auto;background:var(--paper);border-radius:10px;overflow:hidden}
+/* 머리띠 */
+.mast{background:var(--band);color:var(--band-ink);padding:22px 28px 24px;display:flex;flex-direction:column;gap:10px}
+.mast .disc{font-size:12px;background:var(--band-note);border-radius:6px;padding:6px 12px}
+.mast-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:-.02em;line-height:1.25}
+.brand small{font-family:var(--f-body);font-weight:500;font-size:13px;letter-spacing:0;margin-left:6px}
+.mast .meta{font-size:13px;font-family:var(--f-num)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(19px,4.6vw,24px);line-height:1.4;text-wrap:balance}
+.mast .lede{font-size:14.5px;max-width:60ch}
+.old-banner{background:var(--soft);border-bottom:1px solid var(--line);padding:10px 28px;font-size:13.5px;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.linkbtn{font:inherit;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;font-weight:600}
+
+.inner{padding:8px 28px 32px;display:flex;flex-direction:column}
+.sec{display:flex;flex-direction:column;gap:16px;padding-block:30px;border-top:1px solid var(--line);scroll-margin-top:12px}
+.sec:first-child{border-top:0}
+h2{font-size:15.5px;font-weight:600;line-height:1.4;border-left:4px solid var(--marker);padding-left:10px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+h2 .n{font-family:var(--f-num);color:var(--sub);font-size:14px}
+h3{font-family:var(--f-display);font-size:18px;font-weight:700;line-height:1.5;text-wrap:balance}
+h4{font-size:14px;font-weight:600;line-height:1.5;border-left:3px solid var(--marker);padding-left:8px}
+.body{display:flex;flex-direction:column;gap:12px}
+.notice{font-size:13.5px;background:var(--tip);border-radius:6px;padding:10px 14px}
+mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inherit}
+
+/* 01 지표 */
+.board{display:grid;grid-template-columns:repeat(20,1fr);gap:8px}
+.tile{grid-column:span 4;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.tile:nth-child(n+6){grid-column:span 5}
+.tile .k{font-size:12px;color:var(--sub)}
+.tile .v{font-family:var(--f-num);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.4}
+.tile .c{font-family:var(--f-num);font-size:12.5px;font-variant-numeric:tabular-nums}
+.tile .d{font-size:10.5px;color:var(--sub);line-height:1.4}
+@media (max-width:600px){.board{grid-template-columns:repeat(3,1fr);gap:6px}.tile,.tile:nth-child(n+6){grid-column:span 1;padding:8px 9px}.tile .v{font-size:14px}}
+.notes{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px}
+.notes li{padding-left:12px;border-left:2px solid var(--line)}
+.notes b{display:block;font-weight:600;font-size:14.5px}
+.notes span{font-size:14px;color:var(--sub)}
+.big{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--soft);border-radius:8px;padding:16px 18px}
+.big .fig{font-family:var(--f-num);font-weight:600;font-size:clamp(36px,10vw,52px);line-height:1;letter-spacing:-.03em}
+.big .fig small{font-family:var(--f-body);font-size:16px;font-weight:600;margin-left:4px;letter-spacing:0}
+.big .txt{flex:1 1 240px;min-width:0;font-size:14.5px}
+.big .txt b{display:block;font-size:15px}
+
+/* 히트맵 */
+.heat{display:flex;flex-wrap:wrap;gap:3px;background:var(--heat-base);padding:3px;border-radius:8px}
+.heat div{color:var(--heat-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px 4px;min-width:0;line-height:1.3;border-radius:4px}
+.heat .w1{flex:1 1 15%;min-height:58px;font-size:12px}
+.heat .w2{flex:2 1 22%;min-height:72px;font-size:14px}
+.heat .w3{flex:3 1 32%;min-height:96px;font-size:18px}
+.heat b{font-weight:600;overflow-wrap:anywhere}
+.heat span{font-family:var(--f-num);font-size:.82em;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.heat .w1{flex-basis:22%}.heat .w2{flex-basis:30%}.heat .w3{flex-basis:46%;font-size:16px}}
+
+.sub-block{display:flex;flex-direction:column;gap:12px}
+.card{border:1px solid var(--line);border-radius:8px;padding:16px}
+/* 공포탐욕 */
+.fg{display:flex;gap:8px 20px;align-items:center;flex-wrap:wrap}
+.fg svg{flex:0 1 250px;min-width:200px;max-width:100%;height:auto}
+.fg .side{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.fg .score{font-family:var(--f-num);font-weight:600;font-size:40px;line-height:1}
+/* 수급 막대 */
+.flow{display:flex;flex-direction:column;gap:10px}
+.flow .r{display:grid;grid-template-columns:64px 1fr 96px;gap:10px;align-items:center;font-size:13.5px}
+.flow .track{position:relative;height:16px}
+.flow .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--sub)}
+.flow .bar{position:absolute;top:0;bottom:0;border-radius:3px}
+.flow .bar.up{background:var(--up)} .flow .bar.down{background:var(--down)}
+.flow .val{text-align:right;font-family:var(--f-num);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:420px){.flow .r{grid-template-columns:54px 1fr 88px;gap:6px;font-size:12.5px}}
+.tip{background:var(--tip);border-left:4px solid var(--marker);border-radius:0 6px 6px 0;padding:10px 14px;font-size:14px}
+.tip b{font-weight:600}
+/* 장 마감 숫자 */
+.close{background:var(--panel);color:var(--panel-ink);border-radius:8px;display:grid;grid-template-columns:1fr 1fr;gap:1px;overflow:hidden}
+.close>div{padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.close .nm{font-weight:600;font-size:14px}
+.close .px{font-family:var(--f-num);font-weight:600;font-size:20px;font-variant-numeric:tabular-nums}
+.close .px small{font-size:12.5px;margin-left:6px;font-weight:500}
+.close dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:13px}
+.close dt{color:var(--panel-sub)} .close dd{margin:0;text-align:right;font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.close .up{color:var(--panel-up)} .close .down{color:var(--panel-down)}
+.close .brd{font-size:12px;color:var(--panel-sub)}
+@media (max-width:480px){.close{grid-template-columns:1fr}}
+
+/* 04 한마디 */
+.quote{font-family:var(--f-display);font-weight:500;font-size:16.5px;line-height:1.6;background:var(--tip);border-left:4px solid var(--marker);border-radius:0 6px 6px 0;padding:10px 14px}
+.pt{display:flex;flex-direction:column;gap:8px}
+/* 05 뉴스 */
+.news{display:flex;flex-direction:column;gap:12px}
+.news article{border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.tag{font-size:11.5px;font-weight:600;color:var(--accent);letter-spacing:.02em}
+.news h3{font-family:var(--f-body);font-size:15.5px;font-weight:600}
+.news p{font-size:14.5px}
+.why{background:var(--soft);border-radius:6px;padding:8px 12px}
+.why b{font-weight:600}
+.more{font-size:13px;font-weight:600;text-decoration:none}
+/* 06 상식 카드 */
+.tcard{background:var(--panel);color:var(--panel-ink);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.tcard .eyebrow{font-size:12px;color:var(--panel-sub);font-family:var(--f-num)}
+.tcard .tt{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,6vw,30px);line-height:1.3;text-wrap:balance}
+.tcard .tt span{background:linear-gradient(transparent 62%,#8a7400 62%)}
+.tcard .ts{font-size:14px;color:var(--panel-sub)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;list-style:none;padding:0;counter-reset:s}
+.steps li{counter-increment:s;background:rgba(255,255,255,.07);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.5;display:flex;flex-direction:column;gap:2px}
+.steps li::before{content:counter(s);font-family:var(--f-num);font-size:12px;color:#ffe45c}
+.steps b{font-size:14px;font-weight:600}
+.pt ul{padding-left:18px;display:flex;flex-direction:column;gap:6px}
+/* 07 일정 */
+.cal{display:flex;flex-direction:column;gap:8px}
+.cal>div{border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.cal .h{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;align-items:baseline}
+.cal .dt{font-weight:600;font-size:14px;font-family:var(--f-num)}
+.cal .t{font-weight:600;font-size:14px;color:var(--accent);text-align:right}
+.cal .key .t{color:var(--up)}
+.cal .badge{font-family:var(--f-body);font-size:11px;background:var(--tip);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
+.cal p{font-size:13.5px;color:var(--sub)}
+/* 08 퀴즈 */
+.quiz{display:flex;flex-direction:column;gap:22px}
+.q{display:flex;flex-direction:column;gap:8px}
+.q h3{font-family:var(--f-body);font-size:15px;font-weight:600}
+.q h3 .badge{font-size:11px;background:var(--tip);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600;white-space:nowrap}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts button{font:inherit;font-size:14.5px;color:var(--ink);text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
+.opts button:hover{border-color:var(--accent)}
+.opts button.right{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:600}
+.opts button.wrong{opacity:.55;text-decoration:line-through}
+.q .res{font-size:14px;background:var(--soft);border-radius:6px;padding:8px 12px}
+/* 지난 호 */
+.arch{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
+.arch button{width:100%;font:inherit;font-size:14.5px;color:var(--ink);text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:baseline}
+.arch button:hover{border-color:var(--accent)}
+.arch button[aria-current="true"]{background:var(--tip);border-color:transparent}
+.arch .no{font-family:var(--f-num);font-weight:600;font-size:13px;color:var(--accent);white-space:nowrap}
+.arch .ti{min-width:0}
+.arch .dt{font-family:var(--f-num);font-size:12px;color:var(--sub);white-space:nowrap}
+footer{border-top:1px solid var(--line);padding-top:20px;display:flex;flex-direction:column;gap:10px;font-size:12.5px;color:var(--sub)}
+footer ul{padding-left:18px}
+/* 목차 */
+.toc-btn{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));font:inherit;font-size:13px;font-weight:600;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:8px 14px;cursor:pointer;z-index:5}
+.toc{position:fixed;right:16px;bottom:calc(60px + env(safe-area-inset-bottom,0px));background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;z-index:5;max-width:calc(100vw - 32px);box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.toc a{color:var(--ink);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:6px}
+.toc a:hover{background:var(--soft)}
+.toc a span{font-family:var(--f-num);color:var(--sub);font-size:12px;margin-right:8px}
+</style>
+</head>
+<body>
+
+<div class="sheet" id="app"></div>
+<button type="button" class="toc-btn" id="toc-btn" aria-expanded="false" aria-controls="toc">☰ 목차</button>
+<nav class="toc" id="toc" hidden aria-label="목차"></nav>
+
+<script>
+/* =====================================================================
+   발행 방법: ISSUES 배열 맨 앞(아래 표시 줄 바로 다음)에 새 호 객체를 하나 추가합니다.
+   이전 호 객체와 그 아래 렌더 코드는 건드리지 않습니다. 최신 호가 배열의 첫 번째입니다.
+   ===================================================================== */
+const ISSUES = [
+/*@@NEW_ISSUE_BELOW@@*/
+{
+  no: 1, id: "261005",
+  date: "2026. 10. 5 (월)",
+  headline: "일자리가 덜 늘었는데, 주가는 올랐어요",
+  lede: "미국 9월 고용이 예상의 3분의 1에 그쳤어요. 시장은 이걸 금리를 더 올리기 어렵다는 신호로 읽었어요.",
+  notice: "오늘(5일) 국내 증시는 개천절 대체공휴일로 쉬었어요. 한국 지표는 10월 2일 종가, 미국 지표는 10월 2일(현지시간) 종가예요.",
+  indicators: [
+    { k:"코스피",   v:"7,003.74",  pct: 0.46, d:"10/2 종가" },
+    { k:"코스닥",   v:"893.29",    pct:-0.11, d:"10/2 종가" },
+    { k:"다우존스", v:"51,176.96", pct: 0.49, d:"10/2 종가" },
+    { k:"S&P500",   v:"7,722.72",  pct: 0.73, d:"10/2 종가" },
+    { k:"나스닥",   v:"27,190.86", pct: 1.19, d:"10/2 종가" },
+    { k:"원/달러",  v:"1,350.60",  pct:-0.57, d:"10/2 오후 3:30" },
+    { k:"WTI 유가", v:"$91.11",    pct:-1.90, d:"10/2 종가" },
+    { k:"금",       v:"$4,162.3",  pct:-1.0,  d:"10/2 종가" },
+    { k:"비트코인", v:"$86,536",   pct: 3.6,  d:"9월 말 대비 · 10/4" }
+  ],
+  indicatorNotes: [
+    { t:"원/달러 환율: 1,350.6원", x:"하루 만에 7.8원 내렸어요. 환율이 내렸다는 건 원화 가치가 그만큼 올랐다는 뜻이에요." },
+    { t:"국제 유가: WTI $91.11 / 브렌트유 $102.25", x:"WTI는 1.90%, 브렌트유는 0.06% 내렸어요. 주요 7개국(G7)이 비축해 둔 석유 1억 배럴을 풀기로 한 영향이에요." },
+    { t:"금(Gold): 국제 금 $4,162.3", x:"1.0% 내렸어요. 온스당 40달러 떨어졌어요." },
+    { t:"비트코인: $86,536", x:"10월 4일 저녁(미 동부) 기준이에요. 9월 말보다 3.6% 높은 수준이에요." }
+  ],
+  bigNumber: { value:"2.9", unit:"만 명", dir:"down", title:"오늘의 숫자 · 미국 9월 새 일자리",
+    text:"시장은 9만 명 안팎을 예상했는데 실제로는 2만 9천 명만 늘었어요. 7월과 8월 숫자도 합쳐서 6만 명 깎였어요. 실업률은 4.1%에서 4.2%로 올랐어요." },
+  us: {
+    title: "고용 부진에 세 지수 모두 상승",
+    heat: [
+      { n:"엔비디아", p: 1.34, w:3 }, { n:"테슬라", p: 4.65, w:2 }, { n:"브로드컴", p: 3.35, w:2 },
+      { n:"AMD", p: 2.95, w:2 }, { n:"스페이스X", p: 7.35, w:1 }, { n:"마이크론", p:-2.05, w:1 },
+      { n:"인텔", p:-0.56, w:1 }, { n:"나이키", p:-3.64, w:1 }
+    ],
+    heatNote: "빨강은 상승, 파랑은 하락이에요 · 10월 2일(현지) 종가 · 기사에서 등락률이 확인된 종목만 담았어요",
+    paras: [
+      "2일(현지시간) 뉴욕 증시는 다우 0.49%, S&P500 0.73%, 나스닥 1.19% 올랐어요. 나스닥은 장중 27,353.68까지 올라 장중 기준 최고치를 새로 썼어요.",
+      "지금 미국은 금리를 더 올릴지 말지 고민하는 중이에요. 일자리가 예상보다 훨씬 적게 늘자, <b>중앙은행(연준)</b>이 10월 말 회의에서 금리를 올리기 어렵겠다는 기대가 커졌어요. 금리 부담이 줄면 기술주처럼 미래 이익이 큰 회사가 먼저 반응해요.",
+      "주요 7개국(G7)이 비축해 둔 석유 1억 배럴을 풀기로 하면서 유가가 내린 것도 힘을 보탰어요. 다만 한 주 전체로 보면 다우는 1.26%, S&P500은 0.27% 내렸고 나스닥만 0.45% 올랐어요."
+    ],
+    fear: { value:31, prev:29, asof:"10월 2일 장 마감 후",
+      text:"공포 탐욕 지수는 31점으로 '공포' 구간이에요. 하루 전(29점)보다 2점 올랐어요. 주가는 올랐지만 투자자들의 마음은 아직 조심스럽다는 뜻이에요." }
+  },
+  kr: {
+    title: "코스피, 5거래일 만에 7,000선 회복",
+    heat: [
+      { n:"삼성전자", p: 0.00, w:3 }, { n:"SK하이닉스", p: 0.44, w:3 },
+      { n:"LG에너지솔루션", p: 2.91, w:2 }, { n:"삼성바이오로직스", p:-4.51, w:2 }, { n:"현대차", p:-0.72, w:2 },
+      { n:"S-OIL", p:11.69, w:1 }, { n:"SK이노베이션", p:10.32, w:1 }, { n:"한화에어로스페이스", p: 3.68, w:1 },
+      { n:"KB금융", p: 0.84, w:1 }, { n:"삼성생명", p: 1.76, w:1 }, { n:"삼성전기", p: 1.28, w:1 },
+      { n:"SK스퀘어", p: 0.43, w:1 }, { n:"삼성물산", p:-0.29, w:1 }, { n:"LIG넥스원", p: 5.25, w:1 }
+    ],
+    heatNote: "빨강은 상승, 파랑은 하락이에요 · 10월 2일 장 마감",
+    paras: [
+      "2일 코스피는 하락으로 출발했지만 장 막판에 올라 7,003.74로 마쳤어요. <b>기관</b>이 3,814억 원어치를 사들이며 지수를 끌어올렸고, 개인은 1조 7,206억 원, 외국인은 1,438억 원어치를 팔았어요.",
+      "정유주가 눈에 띄었어요. S-OIL이 11.69%, SK이노베이션이 10.32% 올랐어요. 삼성전자는 27만 6,000원으로 전날과 같았고, SK하이닉스는 0.44% 올랐어요. 삼성바이오로직스는 4.51% 내렸어요.",
+      "코스닥은 장중 900선을 넘었다가 외국인 매도에 밀려 893.29로 0.11% 내렸어요."
+    ],
+    flow: { title:"외국인이 코스피에서 사고판 돈 · 최근 5거래일", unit:"억",
+      days: [ { d:"9/28 월", v:-32830 }, { d:"9/29 화", v:-29944 }, { d:"9/30 수", v:-20700 }, { d:"10/1 목", v:1243 }, { d:"10/2 금", v:-1011 } ],
+      note: "빨간 막대는 산 금액(순매수), 파란 막대는 판 금액(순매도)이에요. 시간외 거래까지 더한 집계라 위 본문의 장 마감 시점 숫자와 조금 달라요.",
+      text: "외국인은 9월 28일 하루에만 3조 원 넘게 팔았어요. 그 뒤로 파는 금액이 빠르게 줄었고, 10월 1일에는 1,243억 원어치를 사기도 했어요. 9월 이후 누적으로는 20조 원 넘게 팔았어요.",
+      tip: "<b>왜 외국인 수급을 매일 볼까요?</b> 외국인은 코스피에서 큰손이라, 이들이 사는 쪽이면 지수가 오르고 파는 쪽이면 밀리는 날이 많아요. 금액 자체보다 어제보다 늘었는지 줄었는지, 같은 방향이 며칠째 이어지는지를 봐요." },
+    close: {
+      kospi:  { v:"7,003.74", chg:"+32.39", pct: 0.46, ind:-17206, frg:-1438, inst: 3814 },
+      kosdaq: { v:"893.29",   chg:"-1.00",  pct:-0.11, ind:   815, frg:-1731, inst:  938 },
+      text: "코스피에서는 개인과 외국인이 함께 팔았고 기관이 받아냈어요. 코스닥은 반대로 개인과 기관이 샀고 외국인이 1,731억 원어치를 팔았어요."
+    }
+  },
+  comment: {
+    quote: "나쁜 소식에 주가가 오른 날에는 금리부터 보세요",
+    points: [
+      { t:"1. 시장은 뉴스보다 금리를 먼저 계산해요", paras:[
+        "나쁜 소식에 주가가 오르는 날은 헷갈리기 쉬워요. 시장은 뉴스가 좋은지 나쁜지보다 그 뉴스로 금리가 어디로 갈지를 먼저 계산해요.",
+        "이번에는 일자리가 덜 늘었다는 소식이 금리를 더 올리기 어렵다는 기대로 이어졌어요. 그래서 세 지수가 모두 올랐어요." ] },
+      { t:"2. 채권 시장은 아직 마음을 놓지 않았어요", paras:[
+        "같은 날 미국 10년 만기 국채 금리는 5.283%로 약 0.05%포인트 올랐어요. 주식 시장과 채권 시장의 반응이 달랐던 거예요.",
+        "공포 탐욕 지수도 31점으로 여전히 '공포' 구간이에요. 하루 오른 것만 보고 분위기가 바뀌었다고 보기는 일러요." ] },
+      { t:"3. 이번 주는 삼성전자 실적이에요", paras:[
+        "국내 증시는 6일부터 8일까지 사흘만 열려요. 8일에 삼성전자 3분기 잠정실적이 나와요. 아래 주요 뉴스에서 이어서 설명할게요." ] }
+    ]
+  },
+  news: [
+    { tag:"미국 · 경제", title:"미국 9월 고용 2만 9천 명 증가, 예상 크게 밑돌아",
+      body:"미국 노동통계국이 2일 발표한 9월 고용보고서에서 농업을 뺀 일자리가 2만 9천 명 늘었어요. 최근 1년 월평균(4만 5천 명)보다도 적어요. 보건의료, 건설, 제조업은 늘었고 금융업은 7천 명 줄었어요. 시간당 평균임금은 한 달 전보다 0.1% 올라 예상(0.3%)에 못 미쳤어요.",
+      why:"일자리와 임금이 식으면 물가 압력도 줄어요. 그래서 금리를 더 올릴 이유가 약해져요.",
+      url:"https://www.news1.kr/world/usa-canada/6309595", src:"뉴스1" },
+    { tag:"한국 · 부동산", title:"서울 아파트값 86주 연속 상승, 오름폭은 5주째 줄어",
+      body:"한국부동산원에 따르면 9월 넷째 주 서울 아파트 매매가격은 한 주 전보다 0.09% 올랐어요. 86주 연속 상승으로 역대 가장 긴 기록이에요. 하지만 상승률은 8월 넷째 주 0.29%에서 5주 연속 줄었어요. 강남·서초·송파가 내림세를 이어갔고 용산구도 하락으로 돌아섰어요.",
+      why:"기록은 새로 썼지만 힘은 빠지고 있어요. 비싼 지역부터 내리는 흐름이 다른 지역으로 번지는지가 관건이에요.",
+      url:"https://news.sbs.co.kr/news/endPage.do?news_id=N1008778846", src:"SBS" },
+    { tag:"한국 · 기업", title:"삼성전자 8일 3분기 잠정실적, 분기 영업이익 100조 원 넘을까",
+      body:"이번 주 가장 큰 일정은 8일 삼성전자 3분기 잠정실적이에요. 증권사 전망 평균은 매출 약 201조 7,000억 원, 영업이익 약 108조 1,000억 원이에요. 맞아떨어지면 국내 기업 처음으로 분기 영업이익 100조 원을 넘어요.",
+      why:"삼성전자는 코스피에서 비중이 가장 큰 종목이에요. 실적이 기대에 맞는지에 따라 코스피가 7,000선에 자리 잡을지가 갈려요.",
+      url:"https://www.fnnews.com/news/202610041153252705", src:"파이낸셜뉴스" }
+  ],
+  term: {
+    name: "비농업 고용지표, 미국의 '일자리 성적표' 읽는 법",
+    card: { eyebrow:"경제 상식 한 조각 · 2026.10.05", title:"미국 고용지표,<br><span>금리로 이어지는 길</span>", sub:"일자리 숫자 하나가 우리 증시까지 오는 순서",
+      steps: [ { k:"일자리", x:"예상보다 덜 늘어요" }, { k:"물가", x:"오를 힘이 줄어요" }, { k:"금리", x:"올릴 이유가 약해져요" }, { k:"주가", x:"부담을 덜어요" } ] },
+    intro: "이번 호에 계속 나온 미국 고용보고서의 핵심 숫자예요. 하나씩 풀어볼게요.",
+    points: [
+      { t:"1) 어떤 숫자인가요", items:[
+        "미국 정부가 매달 첫 금요일쯤 발표하는 일자리 통계예요. 농사일을 뺀 나머지 일자리가 <mark>한 달 동안 몇 개 늘었는지</mark>를 세요.",
+        "농업은 계절에 따라 들쭉날쭉해서 빼요." ] },
+      { t:"2) 왜 중요할까요", items:[
+        "금리 때문이에요. 일자리가 많이 늘면 사람들이 돈을 더 쓰고 물가가 오르기 쉬워요. 그러면 중앙은행은 금리를 올려요.",
+        "반대로 일자리가 덜 늘면 금리를 올릴 이유가 줄어요. 이번처럼 고용이 부진한데 주가가 오르는 일이 그래서 생겨요." ] },
+      { t:"3) 주의할 점", items:[
+        "고용이 너무 나빠지면 경기 침체 걱정이 커져서 주가도 함께 내려요. <mark>적당히 식는 것과 얼어붙는 것은 달라요.</mark>",
+        "지난 두 달 숫자도 함께 고쳐서 발표해요. 이번에는 7월과 8월 숫자가 합쳐서 6만 명 깎였어요." ] }
+    ]
+  },
+  calendarIntro: "이번 주 국내 증시는 6일(화)부터 8일(목)까지 사흘만 열려요. 시각은 한국 기준이에요.",
+  calendar: [
+    { d:"10월 5일(월) 밤", t:"미국 9월 ISM 서비스업지수", n:"미국 경제의 3분의 2를 차지하는 서비스업 경기를 보여줘요." },
+    { d:"10월 6일(화)", t:"국내 증시 다시 개장", n:"연휴 동안 쌓인 미국 고용 소식이 한꺼번에 반영돼요. 뉴욕 연은 윌리엄스 총재 연설도 있어요." },
+    { d:"10월 8일(목)", t:"삼성전자 3분기 잠정실적", key:true, n:"이번 주 국내 증시에서 가장 큰 일정이에요." },
+    { d:"10월 8일(목) 새벽", t:"미국 9월 FOMC 의사록 공개", n:"금리를 더 올릴지에 대한 위원들의 생각을 볼 수 있어요." },
+    { d:"10월 9일(금)", t:"한글날 국내 증시 휴장", n:"미국에서는 10월 미시간대 소비자심리지수가 나와요." }
+  ],
+  quizIntro: "오늘 내용에서 세 문제예요. 답을 고르면 풀이가 나와요.",
+  quiz: [
+    { q:"미국 고용이 예상보다 부진했는데 주가가 오른 이유로 가장 알맞은 것은?", tag:"미국 증시",
+      opts:[ "회사들이 인건비를 아껴 이익이 늘어서", "금리를 더 올릴 가능성이 낮아졌다고 봐서", "실업률이 내려가서" ], answer:1,
+      explain:"일자리가 덜 늘면 물가 압력이 줄어 금리를 올릴 이유가 약해져요. 9월 실업률은 4.1%에서 4.2%로 오히려 올랐어요." },
+    { q:"비농업 고용지표에서 농업 일자리를 빼는 이유는?", tag:"경제 상식",
+      opts:[ "농업 일자리가 너무 적어서", "계절에 따라 숫자가 들쭉날쭉해서", "농업은 다른 부처가 따로 발표해서" ], answer:1,
+      explain:"농사일은 철마다 필요한 사람 수가 크게 달라져요. 그래서 빼고 세야 흐름이 잘 보여요." },
+    { q:"서울 아파트값이 86주 연속 올랐어요. 최근 상승률의 흐름은 어땠을까요?", tag:"주요 뉴스",
+      opts:[ "5주 연속 커졌어요", "5주 연속 줄었어요", "5주째 그대로예요" ], answer:1,
+      explain:"8월 넷째 주 0.29%에서 9월 넷째 주 0.09%까지 5주 연속 줄었어요. 오르고는 있지만 속도가 느려진 거예요." }
+  ],
+  sources: [
+    ["뉴욕증시 마감 (서울경제)","https://www.sedaily.com/article/20097861"],
+    ["미국 종목·국채금리 (머니S)","https://www.sidae.com/article/2026100310330647518"],
+    ["미국 종목 등락 (Strategitz 마감 정리)","https://strategitz.substack.com/p/global-markets-close-october-2-2026"],
+    ["공포 탐욕 지수 (Benzinga)","https://www.benzinga.com/markets/market-summary/26/10/62154364/nasdaq-jumps-300-points-following-jobs-data-investor-sentiment-improves-greed-index-remains-in-fear-zone"],
+    ["유가·금 마감 (이투데이)","https://www.etoday.co.kr/news/view/2632254"],
+    ["브렌트유 (여성신문)","https://www.womennews.co.kr/news/articleView.html?idxno=282899"],
+    ["코스피·코스닥·환율 마감 (서울신문)","https://www.seoul.co.kr/news/economy/securities/2026/10/02/20261002500187"],
+    ["코스피·코스닥 수급과 종목 (핀포인트뉴스)","https://www.pinpointnews.co.kr/news/articleView.html?idxno=492336"],
+    ["외국인 일자별 매매동향 10/2 (핀포인트뉴스)","https://www.pinpointnews.co.kr/news/articleView.html?idxno=492408"],
+    ["외국인 9월 이후 누적 순매도 (베타뉴스)","https://betanews.net/article/view/beta202610040008"],
+    ["국내 증시 종목 동향 (머니투데이)","https://www.mt.co.kr/stock/2026/10/02/2026100216085371801"],
+    ["비트코인 시세 (Bitcoin News)","https://news.bitcoin.com/ko/market-updates/eoptobeo-uptober-gangsejang-sogeseo-biteukoin-gagyeogi-8man-7cheon-dalleoreul-dudeurimyeo-9man-4cheon-dalleoreul-noriggo-itda/"],
+    ["주간 경제 일정 (이코노미블록)","https://economybloc.com/article/118264/"],
+    ["국내 증시 종목 동향 (한국면세뉴스)","https://www.kdfnews.com/news/articleView.html?idxno=188812"],
+    ["미국 9월 고용보고서 (비건뉴스)","https://www.vegannews.co.kr/news/article.html?no=390774"],
+    ["삼성전자 실적 전망 (이슈밸리)","https://www.issuevalley.com/news/articleView.html?idxno=56906"]
+  ]
+}
+];
+
+/* ===== 여기부터는 렌더 코드 (발행 때 수정하지 않습니다) ===== */
+(function(){
+  const app = document.getElementById("app"), toc = document.getElementById("toc"), tocBtn = document.getElementById("toc-btn");
+  const dir = p => p>0?"up":p<0?"down":"flat";
+  const sign = p => (p>0?"+":"") + p.toFixed(2) + "%";
+  const arrow = p => p>0?"▲":p<0?"▼":"–";
+  const ps = a => (a||[]).map(t=>`<p>${t}</p>`).join("");
+  const won = v => { const a=Math.abs(v), jo=Math.floor(a/10000), eok=a%10000;
+    return (v>0?"+":v<0?"−":"") + (jo? jo+"조 ":"") + (eok? eok.toLocaleString("ko-KR")+"억" : (jo?"":"0억")); };
+  const SECTIONS = [["s1","경제지표 · 오늘의 숫자"],["s2","미국 증시 마감"],["s3","한국 증시 마감"],["s4","말타의 한마디"],["s5","주요 뉴스"],["s6","경제 상식 한 조각"],["s7","다가오는 일정"],["s8","오늘의 머니퀴즈"]];
+  const h2 = (i,extra) => `<h2><span class="n">${String(i+1).padStart(2,"0")}</span>${SECTIONS[i][1]}${extra?` <span class="small">${extra}</span>`:""}</h2>`;
+
+  function heat(list){
+    return `<div class="heat">${list.map(s=>{
+      const a = Math.min(Math.abs(s.p)/3,1), pctMix = Math.round(18 + a*72);
+      const bg = s.p===0 ? "var(--heat-base)" : `color-mix(in srgb, ${s.p>0?"#d92b3a":"#1e5fd0"} ${pctMix}%, var(--heat-base))`;
+      return `<div class="w${s.w||1}" style="background:${bg}"><b>${s.n}</b><span>${sign(s.p)}</span></div>`;
+    }).join("")}</div>`;
+  }
+  function gauge(f){
+    const zones=[[0,25,"극단적 공포"],[25,45,"공포"],[45,55,"중립"],[55,75,"탐욕"],[75,100,"극단적 탐욕"]];
+    const cx=130, cy=130, r=100, pt=(v,rad)=>{ const a=Math.PI*(1-v/100); return [cx+rad*Math.cos(a), cy-rad*Math.sin(a)]; };
+    const zi = zones.findIndex(z=>f.value<z[1]) < 0 ? 4 : zones.findIndex(z=>f.value<z[1]);
+    const arcs = zones.map((z,i)=>{ const [x1,y1]=pt(z[0]+0.8,r), [x2,y2]=pt(z[1]-0.8,r);
+      return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${i===zi?"var(--ink)":"var(--line)"}" stroke-width="18"/>`; }).join("");
+    const [nx,ny]=pt(f.value,r-22);
+    const ticks=[0,25,50,75,100].map(v=>{ const [x,y]=pt(v,r-34); return `<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--sub)" font-family="var(--f-num)">${v}</text>`; }).join("");
+    const svg = `<svg viewBox="0 0 260 150" role="img" aria-label="공포 탐욕 지수 ${f.value}점, ${zones[zi][2]} 구간">${arcs}${ticks}<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--ink)"/></svg>`;
+    const diff = f.prev==null ? "" : `<span class="small">하루 전 ${f.prev}점 · ${f.value-f.prev>0?"+":""}${f.value-f.prev}점</span>`;
+    return `<div class="sub-block"><h4>공포 탐욕 지수</h4><div class="card fg">${svg}<div class="side"><span class="score">${f.value}</span><b>${zones[zi][2]}</b>${diff}<span class="small">0에 가까울수록 겁을 내고, 100에 가까울수록 욕심을 내는 상태예요.</span></div></div><p>${f.text}</p><p class="small center">CNN Fear &amp; Greed Index · ${f.asof}</p></div>`;
+  }
+  function flow(f){
+    const vals=f.days.map(x=>x.v), lo=Math.min(0,...vals), hi=Math.max(0,...vals), span=(hi-lo)||1, zero=(0-lo)/span*100;
+    const rows=f.days.map(x=>{ const w=Math.max(Math.abs(x.v)/span*100,0.6), left=x.v<0?zero-w:zero;
+      return `<div class="r"><span>${x.d}</span><div class="track"><div class="bar ${dir(x.v)}" style="left:${left.toFixed(2)}%;width:${w.toFixed(2)}%"></div><div class="zero" style="left:${zero.toFixed(2)}%"></div></div><span class="val ${dir(x.v)}">${won(x.v)}</span></div>`; }).join("");
+    return `<div class="sub-block"><h4>외국인 수급 돋보기</h4><div class="card"><p class="small" style="margin-bottom:12px">${f.title}</p><div class="flow" role="img" aria-label="${f.title}">${rows}</div></div><p class="small center">${f.note}</p><p>${f.text}</p>${f.tip?`<p class="tip">${f.tip}</p>`:""}</div>`;
+  }
+  function closing(c){
+    const col=(nm,x)=>`<div><span class="nm">${nm}</span><span class="px ${dir(x.pct)}">${x.v}<small>${arrow(x.pct)} ${x.chg.replace(/^[+-]/,"")} ${sign(x.pct)}</small></span>
+      <dl><dt>개인</dt><dd class="${dir(x.ind)}">${won(x.ind)}원</dd><dt>외국인</dt><dd class="${dir(x.frg)}">${won(x.frg)}원</dd><dt>기관</dt><dd class="${dir(x.inst)}">${won(x.inst)}원</dd></dl>
+      ${x.adv!=null?`<span class="brd">상승 ${x.adv} · 하락 ${x.dec}</span>`:""}</div>`;
+    return `<div class="sub-block"><h4>오늘 장 마감 숫자</h4><div class="close">${col("코스피",c.kospi)}${col("코스닥",c.kosdaq)}</div>${c.text?`<p>${c.text}</p>`:""}</div>`;
+  }
+
+  function render(I){
+    const latest = ISSUES[0], isOld = I !== latest, idx = ISSUES.indexOf(I);
+    document.title = "말타노트";
+    app.innerHTML = `
+    <header class="mast">
+      <p class="disc">이 레터는 공개된 자료를 정리한 시장 정보예요. 특정 금융투자상품의 매수·매도 권유나 개인별 투자 조언이 아니에요.</p>
+      <div class="mast-top"><div class="brand">말타노트<small>by @malta_note</small></div><div class="meta">제${I.no}호 · ${I.date}</div></div>
+      <h1>${I.headline}</h1>
+      ${I.lede?`<p class="lede">${I.lede}</p>`:""}
+    </header>
+    ${isOld?`<div class="old-banner"><span>지난 호를 보고 있어요.</span><button type="button" class="linkbtn" data-go="${latest.id}">최신 호(제${latest.no}호) 보기 →</button></div>`:""}
+    <div class="inner">
+      <section class="sec" id="s1">${h2(0)}
+        ${I.notice?`<p class="notice">${I.notice}</p>`:""}
+        <div class="board">${I.indicators.map(x=>`<div class="tile"><span class="k">${x.k}</span><span class="v">${x.v}</span><span class="c ${dir(x.pct)}">${arrow(x.pct)} ${sign(x.pct).replace(/^[+-]/,"")}</span><span class="d">${x.d}</span></div>`).join("")}</div>
+        ${I.indicatorNotes?`<ul class="notes">${I.indicatorNotes.map(n=>`<li><b>${n.t}</b><span>${n.x}</span></li>`).join("")}</ul>`:""}
+        ${I.bigNumber?`<div class="big"><div class="fig ${I.bigNumber.dir}">${I.bigNumber.value}<small>${I.bigNumber.unit}</small></div><div class="txt"><b>${I.bigNumber.title}</b>${I.bigNumber.text}</div></div>`:""}
+      </section>
+
+      <section class="sec" id="s2">${h2(1)}<h3>${I.us.title}</h3>
+        ${I.us.heat&&I.us.heat.length?heat(I.us.heat)+`<p class="small center">${I.us.heatNote||""}</p>`:""}
+        <div class="body">${ps(I.us.paras)}</div>
+        ${I.us.fear?gauge(I.us.fear):""}
+      </section>
+
+      <section class="sec" id="s3">${h2(2)}<h3>${I.kr.title}</h3>
+        ${I.kr.heat&&I.kr.heat.length?heat(I.kr.heat)+`<p class="small center">${I.kr.heatNote||""}</p>`:""}
+        <div class="body">${ps(I.kr.paras)}</div>
+        ${I.kr.flow?flow(I.kr.flow):""}
+        ${I.kr.close?closing(I.kr.close):""}
+      </section>
+
+      <section class="sec" id="s4">${h2(3)}
+        <p class="quote">“${I.comment.quote}”</p>
+        ${(I.comment.points||[]).map(p=>`<div class="pt"><h4>${p.t}</h4>${ps(p.paras)}</div>`).join("")}
+      </section>
+
+      <section class="sec" id="s5">${h2(4)}
+        <div class="news">${I.news.map(n=>`<article><span class="tag">${n.tag}</span><h3>${n.title}</h3><p>${n.body}</p><p class="why"><b>왜 중요할까요?</b> ${n.why}</p><a class="more" href="${n.url}" target="_blank" rel="noopener">원문 보기 (${n.src}) →</a></article>`).join("")}</div>
+      </section>
+
+      <section class="sec" id="s6">${h2(5)}<h3>${I.term.name}</h3>
+        ${I.term.card?`<div class="tcard"><span class="eyebrow">${I.term.card.eyebrow}</span><div class="tt">${I.term.card.title}</div><span class="ts">${I.term.card.sub}</span><ol class="steps">${I.term.card.steps.map(s=>`<li><b>${s.k}</b>${s.x}</li>`).join("")}</ol></div>`:""}
+        ${I.term.intro?`<p>${I.term.intro}</p>`:""}
+        ${(I.term.points||[]).map(p=>`<div class="pt"><h4>${p.t}</h4><ul>${p.items.map(t=>`<li>${t}</li>`).join("")}</ul></div>`).join("")}
+      </section>
+
+      <section class="sec" id="s7">${h2(6)}
+        ${I.calendarIntro?`<p>${I.calendarIntro}</p>`:""}
+        <div class="cal">${I.calendar.map(c=>`<div class="${c.key?"key":""}"><div class="h"><span class="dt">${c.d}${c.key?`<span class="badge">가장 중요</span>`:""}</span><span class="t">${c.t}</span></div><p>${c.n}</p></div>`).join("")}</div>
+      </section>
+
+      <section class="sec" id="s8">${h2(7)}
+        ${I.quizIntro?`<p>${I.quizIntro}</p>`:""}
+        <div class="quiz">${I.quiz.map((q,qi)=>`<div class="q" data-q="${qi}"><h3>Q${qi+1}. ${q.q}${q.tag?`<span class="badge">${q.tag}</span>`:""}</h3><div class="opts">${q.opts.map((o,i)=>`<button type="button" id="quiz-${qi}-${i}" data-i="${i}">${"①②③④"[i]} ${o}</button>`).join("")}</div><p class="res" id="quiz-res-${qi}" hidden></p></div>`).join("")}</div>
+      </section>
+
+      <section class="sec" id="archive"><h2>지난 호 보기 <span class="small">지금까지 ${ISSUES.length}호</span></h2>
+        <ul class="arch" id="arch-list"></ul>
+        <p class="center" id="arch-more-wrap" hidden><button type="button" class="linkbtn" id="arch-more">지난 호 전체 보기 →</button></p>
+      </section>
+
+      <footer>
+        <p><b>이미지 · 자료 출처</b></p>
+        <ul>${I.sources.map(s=>`<li><a href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a></li>`).join("")}</ul>
+        <p>이 글은 정보 전달을 목적으로 한 정리 노트예요. 특정 종목을 사거나 팔라는 권유가 아니고, 모든 투자의 책임은 본인에게 있어요. 수치는 위 기사에서 가져왔고, 발표 기관 수치와 차이가 날 수 있어요.</p>
+        <p>© 2026 말타노트 · @malta_note</p>
+      </footer>
+    </div>`;
+
+    // 지난 호 목록 (최신순, 처음엔 5개)
+    let showAll = false;
+    const list = document.getElementById("arch-list"), moreWrap = document.getElementById("arch-more-wrap");
+    const drawArch = () => {
+      const items = showAll ? ISSUES : ISSUES.slice(0,5);
+      list.innerHTML = items.map(x=>`<li><button type="button" data-go="${x.id}" aria-current="${x===I}"><span class="no">제${x.no}호</span><span class="ti">${x.headline}</span><span class="dt">${x.date}</span></button></li>`).join("");
+      moreWrap.hidden = showAll || ISSUES.length<=5;
+    };
+    drawArch();
+    document.getElementById("arch-more").addEventListener("click",()=>{ showAll=true; drawArch(); });
+
+    // 퀴즈
+    app.querySelectorAll(".q").forEach(el=>{
+      const q = I.quiz[+el.dataset.q], res = el.querySelector(".res");
+      el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+        const pick=+b.dataset.i;
+        el.querySelectorAll("button").forEach(x=>{ x.classList.toggle("right", +x.dataset.i===q.answer); x.classList.toggle("wrong", +x.dataset.i===pick && pick!==q.answer); });
+        res.hidden=false; res.innerHTML=`<b>${pick===q.answer?"맞았어요.":"아쉬워요. 정답은 "+"①②③④"[q.answer]+"번이에요."}</b> ${q.explain}`;
+      }));
+    });
+    toc.innerHTML = SECTIONS.map((s,i)=>`<a href="#${s[0]}"><span>${String(i+1).padStart(2,"0")}</span>${s[1]}</a>`).join("") + `<a href="#archive"><span>··</span>지난 호 보기</a>`;
+  }
+
+  const find = id => ISSUES.find(x=>x.id===id);
+  function go(id, scroll){
+    const I = find(id) || ISSUES[0];
+    render(I);
+    try{ history.replaceState(null,"", I===ISSUES[0] ? location.pathname+location.search : "#ho"+I.id); }catch(e){}
+    if(scroll) window.scrollTo({top:0});
+  }
+  document.addEventListener("click",e=>{
+    const g = e.target.closest("[data-go]");
+    if(g){ go(g.dataset.go,true); return; }
+    const a = e.target.closest(".toc a");
+    if(a){ e.preventDefault(); const t=document.getElementById(a.getAttribute("href").slice(1)); if(t) t.scrollIntoView({behavior:"smooth"}); toc.hidden=true; tocBtn.setAttribute("aria-expanded","false"); return; }
+    if(e.target===tocBtn){ toc.hidden=!toc.hidden; tocBtn.setAttribute("aria-expanded",String(!toc.hidden)); return; }
+    if(!toc.hidden && !e.target.closest(".toc")){ toc.hidden=true; tocBtn.setAttribute("aria-expanded","false"); }
+  });
+  const m = (location.hash||"").match(/^#ho(\d+)$/);
+  go(m?m[1]:ISSUES[0].id,false);
+})();
+</script>
+</body>
+</html>
