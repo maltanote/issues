@@ -75,7 +75,8 @@ mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inherit
 .tile .v{font-family:var(--f-num);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.4}
 .tile .c{font-family:var(--f-num);font-size:12.5px;font-variant-numeric:tabular-nums}
 .tile .d{font-size:10.5px;color:var(--sub);line-height:1.4}
-@media (max-width:600px){.board{grid-template-columns:repeat(3,1fr);gap:6px}.tile,.tile:nth-child(n+6){grid-column:span 1;padding:8px 9px}.tile .v{font-size:14px}}
+.board.b10 .tile:nth-child(n+6){grid-column:span 4}
+@media (max-width:600px){.board{grid-template-columns:repeat(3,1fr);gap:6px}.tile,.tile:nth-child(n+6),.board.b10 .tile:nth-child(n+6){grid-column:span 1;padding:8px 9px}.tile .v{font-size:14px}.board.b10{grid-template-columns:repeat(2,1fr)}}
 .notes{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px}
 .notes li{padding-left:12px;border-left:2px solid var(--line)}
 .notes b{display:block;font-weight:600;font-size:14.5px}
@@ -104,14 +105,13 @@ mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inherit
 .fg .side{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:4px;font-size:14px}
 .fg .score{font-family:var(--f-num);font-weight:600;font-size:40px;line-height:1}
 /* 수급 막대 */
-.flow{display:flex;flex-direction:column;gap:10px}
-.flow .r{display:grid;grid-template-columns:64px 1fr 96px;gap:10px;align-items:center;font-size:13.5px}
-.flow .track{position:relative;height:16px}
+.flow{display:flex;flex-direction:column;gap:14px}
+.flow .r{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:baseline;font-size:15px}
+.flow .track{position:relative;height:18px;grid-column:1/-1;order:3}
 .flow .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--sub)}
 .flow .bar{position:absolute;top:0;bottom:0;border-radius:3px}
 .flow .bar.up{background:var(--up)} .flow .bar.down{background:var(--down)}
 .flow .val{text-align:right;font-family:var(--f-num);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-@media (max-width:420px){.flow .r{grid-template-columns:54px 1fr 88px;gap:6px;font-size:12.5px}}
 .tip{background:var(--tip);border-left:4px solid var(--marker);border-radius:0 6px 6px 0;padding:10px 14px;font-size:14px}
 .tip b{font-weight:600}
 /* 장 마감 숫자 */
@@ -149,6 +149,9 @@ mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inherit
 .steps li::before{content:counter(s);font-family:var(--f-num);font-size:12px;color:#ffe45c}
 .steps b{font-size:14px;font-weight:600}
 .pt ul{padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.box{border:1.5px solid var(--up);border-radius:8px;padding:10px 14px;background:var(--up-soft);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.box .lb{align-self:flex-start;background:var(--up);color:var(--paper);font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px}
+.arrow{font-size:14px;color:var(--sub)}
 /* 07 일정 */
 .cal{display:flex;flex-direction:column;gap:8px}
 .cal>div{border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
@@ -214,11 +217,12 @@ const ISSUES = [
     { k:"나스닥",   v:"27,477.31", pct: 1.05, d:"10/5 종가" },
     { k:"원/달러",  v:"1,343.60",  pct:-0.03, d:"10/6 오후 3:30" },
     { k:"WTI 유가", v:"$89.43",    pct:-1.84, d:"10/5 종가" },
+    { k:"달러인덱스", v:"102.18",  pct: 0.24, d:"10/5 종가" },
     { k:"금",       v:"$4,156.8",  pct:-0.13, d:"10/5 종가" },
     { k:"비트코인", v:"$85,000",   pct:-1.04, d:"24시간 · 10/6 오전 10:30" }
   ],
   indicatorNotes: [
-    { t:"원/달러 환율: 1,343.6원", x:"마감 기사 기준으로 전 거래일 주간 종가보다 0.4원 내렸어요. 달러가 강했지만 수출 기업들이 달러를 팔아 원화로 바꾸는 물량이 나오면서 거의 제자리였어요." },
+    { t:"원/달러 환율: 1,343.6원", x:"마감 기사 기준으로 전 거래일 주간 종가보다 0.4원 내렸어요. 달러가 강했지만 수출 기업들이 달러를 팔아 원화로 바꾸는 물량이 나오면서 거의 제자리였어요. 달러의 힘을 보여주는 달러인덱스는 5일 0.24% 오른 102.18로 마감했어요." },
     { t:"국제 유가: WTI $89.43 / 브렌트유 $100.32", x:"WTI는 1.84%, 브렌트유는 1.89% 내렸어요. 중동 원유 수출이 늘고 주요 7개국(G7)이 비축유 1억 배럴을 풀기로 한 영향이 이어졌어요." },
     { t:"금(Gold): 국제 금 $4,156.8", x:"0.13%(5.5달러) 내려 거의 제자리였어요. 국채 금리와 달러가 함께 오르면 이자가 붙지 않는 금은 힘을 받기 어려워요." },
     { t:"비트코인: $85,000", x:"6일 오전 10시 30분 기준으로 24시간 전보다 1.04% 내렸어요. 전날 8만 6천 달러까지 오른 뒤 이익을 챙기려는 매도가 나왔어요." }
@@ -238,7 +242,8 @@ const ISSUES = [
     paras: [
       "5일(현지시간) 뉴욕 증시는 다우 0.18%, S&P500 0.66%, 나스닥 1.05% 올랐어요. 나스닥은 27,477.31로 마감해 사상 최고치를 새로 썼어요.",
       "이날 미국 10년 국채 금리는 5.31%까지 올랐어요. 보통 금리가 오르면 기술주가 먼저 흔들리는데, 이번에는 반대였어요. 인공지능(AI)에 쓰이는 컴퓨터 수요가 워낙 강하다는 기대로 <b>엔비디아(+2.12%)</b>, 브로드컴(+2.12%), 테슬라(+2.20%), 마이크로소프트(+1.48%)가 함께 올랐어요. 다만 메모리 반도체 회사인 마이크론은 1.02% 내려, 반도체 안에서도 흐름이 갈렸어요.",
-      "큰 인수 소식도 있었어요. 프랑스 슈나이더 일렉트릭이 소프트웨어 회사 PTC를 226억 달러에 사기로 하면서 PTC가 33.49% 뛰었어요. 반대로 물류 회사 C.H.로빈슨은 RXO를 인수한다고 밝힌 뒤 10.85% 내렸어요. 9월 ISM 서비스업지수는 54.9로 한 달 전(55.4)과 예상(55.0)을 조금 밑돌았어요."
+      "큰 인수 소식도 있었어요. 프랑스 슈나이더 일렉트릭이 소프트웨어 회사 PTC를 226억 달러에 사기로 하면서 PTC가 33.49% 뛰었어요. 반대로 물류 회사 C.H.로빈슨은 RXO를 인수한다고 밝힌 뒤 10.85% 내렸어요. 9월 ISM 서비스업지수는 54.9로 한 달 전(55.4)과 예상(55.0)을 조금 밑돌았어요.",
+      "금리가 오른 건 물가 걱정 때문이에요. 같은 조사에서 서비스 기업들이 치르는 값을 보여주는 지불가격지수가 74로 올라 2022년 7월 이후 가장 높았어요. 시장은 <b>연준</b>이 10월 27~28일 회의에서 금리를 0.25%포인트 올릴 가능성을 20~25% 정도로 보고 있어요."
     ],
     fear: { value:43, prev:31, asof:"10월 5일 장 마감 후",
       text:"공포 탐욕 지수는 43점으로 하루 전(31점)보다 12점 올랐어요. 아직 '공포' 구간이지만 '중립'(45점부터)에 가까워졌어요. 나스닥이 최고치를 쓰면서 투자자들의 마음이 조금 풀린 거예요." }
@@ -264,13 +269,14 @@ const ISSUES = [
       text: "지난주 후반 1,000억 원대로 줄었던 외국인 매도가 연휴 뒤 첫날 다시 1조 7,567억 원으로 커졌어요. 9월 말 하루 2조~3조 원씩 팔던 때보다는 작지만, 매도가 잦아들던 흐름은 일단 끊겼어요.",
       tip: "<b>하루 숫자보다 방향이 바뀌는 날을 보세요.</b> 줄어들던 매도가 다시 커지거나, 팔던 외국인이 사기 시작하는 날이 흐름이 바뀌는 신호일 수 있어요. 다만 하루만으로는 알 수 없어서 이틀, 사흘 이어지는지 함께 봐요." },
     close: {
-      kospi:  { v:"6,941.39", chg:"-62.35", pct:-0.89, ind:  7406, frg:-17509, inst: -200 },
-      kosdaq: { v:"919.92",   chg:"+26.63", pct: 2.98, ind: -2073, frg:  1094, inst:  979 },
-      text: "코스피에서는 외국인이 크게 팔고 개인이 받았어요. 코스닥은 반대로 외국인과 기관이 사고 개인이 2,073억 원어치를 팔았어요. 장 마감 시점 집계라 매체에 따라 수십억 원씩 차이가 나요."
+      kospi:  { v:"6,941.39", chg:"-62.35", pct:-0.89, ind:  7406, frg:-17509, inst: -200, prog:-12586, progLabel:"프로그램(비차익)", vol:"19조 1,000억원" },
+      kosdaq: { v:"919.92",   chg:"+26.63", pct: 2.98, ind: -2073, frg:  1094, inst:  979, vol:"8조 7,000억원" },
+      text: "코스피에서는 외국인이 크게 팔고 개인이 받았어요. 코스닥은 반대로 외국인과 기관이 사고 개인이 2,073억 원어치를 팔았어요. 장 마감 시점 집계라 매체에 따라 수십억 원씩 차이가 나요. 코스피에서는 컴퓨터가 여러 종목을 한꺼번에 사고파는 <b>프로그램 매매</b>(비차익)도 1조 2,586억 원 순매도였어요."
     }
   },
   comment: {
     quote: "지수가 같은 날 엇갈리면, 돈이 어디서 어디로 옮겨 갔는지 보세요",
+    intro: "오늘은 숫자가 많았어요. 금리, 업종, 일정 세 장면으로 나눠 보면 이해하기 쉬워요.",
     points: [
       { t:"1. 미국도 한국도 '전부 오른 날'은 아니었어요", paras:[
         "나스닥이 최고치를 썼지만 오른 건 AI 관련 대형주였고, 메모리 반도체인 마이크론은 내렸어요. 필라델피아 반도체지수도 0.27% 오르는 데 그쳤어요.",
@@ -285,14 +291,17 @@ const ISSUES = [
   news: [
     { tag:"미국 · 경제", title:"미국 10년 국채 금리 장중 5.347%, 2002년 4월 이후 최고",
       body:"5일(현지시간) 미국 10년 만기 국채 금리가 장중 5.347%까지 올랐어요. 30년 만기 금리도 5.702%로 2002년 5월 이후 가장 높았어요. 그런데도 뉴욕 증시는 올랐고 나스닥은 사상 최고치로 마감했어요. 달러도 강해져 유로화는 달러 대비 0.3% 내렸어요.",
+      more:"금리가 오른 직접적인 이유는 물가 걱정이에요. 같은 날 나온 9월 ISM 서비스업 조사에서 기업들이 치르는 값을 보여주는 지불가격지수가 74로 올랐어요. 2022년 7월 이후 가장 높은 수준이에요. 물가가 다시 오를 수 있다는 신호라서, 채권을 가진 사람들이 더 높은 이자를 요구하게 된 거예요.",
       why:"국채 금리는 전 세계 대출 금리의 기준이에요. 이 숫자가 오르면 돈 빌리는 값이 비싸지고, 주식의 매력은 상대적으로 줄어요.",
       url:"https://etoday.co.kr/news/view/2632544", src:"이투데이" },
     { tag:"한국 · 부동산", title:"서울에서 생애 첫 집 산 사람 36% 늘어, 증가분의 58%는 강동구",
       body:"올해 7~9월 서울에서 생애 처음 집을 산 사람은 2만 4,397명으로 1년 전 같은 기간(1만 7,955명)보다 35.9% 늘었어요. 늘어난 6,442명 가운데 58.3%가 강동구에서 나왔어요. 연령별로는 30대가 1만 2,744명으로 절반(52.2%)을 넘었고, 30~40대를 합치면 76.5%예요. 성동구와 마포구는 오히려 줄었어요.",
+      more:"생애 첫 매수는 집이 없던 사람이 처음 집을 사는 거래예요. 그래서 투자 목적보다 실제로 살 집을 찾는 수요에 가까워요. 이 숫자가 늘었다는 건 더 기다리기보다 지금 사겠다고 마음먹은 사람이 많아졌다는 뜻으로 읽을 수 있어요. 다만 늘어난 인원의 절반 이상이 한 구에 몰려 있어서, 서울 전체가 고르게 달아올랐다고 보기는 어려워요.",
       why:"첫 집을 사는 사람들이 집값과 대출 여건을 따져 상대적으로 들어가기 쉬운 지역으로 몰리고 있다는 신호예요.",
       url:"https://www.pinpointnews.co.kr/news/articleView.html?idxno=492982", src:"핀포인트뉴스" },
     { tag:"한국 · 주식", title:"삼성전자·SK하이닉스 자사주 매입 종료 앞두고 코스피 약세",
       body:"6일 코스피는 외국인이 1조 7천억 원대를 팔면서 6,941.39로 내렸어요. 높은 국채 금리에 더해, 삼성전자의 자사주 매입이 이번 주에, SK하이닉스는 다음 주에 끝난다는 점이 부담으로 꼽혔어요. 업종별로는 의료·정밀기기가 6.53% 올랐고 운송장비(-1.43%)와 전기전자(-1.31%)가 내렸어요.",
+      more:"자사주 매입은 회사가 번 돈으로 시장에서 자기 주식을 사들이는 거예요. 사는 동안에는 매일 일정한 매수 주문이 들어오는 셈이라 주가가 덜 흔들려요. 그래서 끝나는 날이 다가오면 그 빈자리를 걱정하는 매도가 먼저 나오기도 해요. 8일 삼성전자 3분기 잠정실적이 그 빈자리를 채울 재료가 될지가 관심이에요.",
       why:"자사주 매입은 회사가 자기 주식을 꾸준히 사 주는 것이라 주가를 받쳐 주는 역할을 해요. 이게 끝나면 그 자리를 다른 매수세가 채워야 해요.",
       url:"https://fnnews.com/news/202610061558101841", src:"파이낸셜뉴스" }
   ],
@@ -300,17 +309,39 @@ const ISSUES = [
     name: "국채 금리, 모든 금리의 '기준점' 읽는 법",
     card: { eyebrow:"경제 상식 한 조각 · 2026.10.06", title:"국채 금리가 오르면<br><span>왜 주식이 긴장할까</span>", sub:"나라가 빌리는 돈의 이자가 내 지갑까지 오는 순서",
       steps: [ { k:"국채 금리", x:"나라가 내는 이자가 올라요" }, { k:"대출 금리", x:"기업과 가계의 이자도 따라 올라요" }, { k:"주식 매력", x:"안전한 이자와 비교돼요" }, { k:"돈의 이동", x:"위험한 자산에서 빠지기 쉬워요" } ] },
-    intro: "오늘 여러 번 나온 미국 10년 국채 금리 5.31%가 왜 큰 뉴스인지 풀어볼게요.",
+    note: "<b>이 코너는 특정 상품 추천이 아니라 경제 기본 지식을 공부하는 자료예요.</b> 본문에 나오는 사이트 이름은 숫자를 직접 확인하는 방법을 설명하기 위한 예시예요.",
+    intro: "오늘 여러 번 나온 미국 10년 국채 금리 5.31%가 왜 큰 뉴스인지 차례로 풀어볼게요.",
     points: [
-      { t:"1) 국채 금리가 뭔가요", items:[
+      { t:"1) 국채가 뭐예요?", items:[
         "국채는 나라가 돈을 빌리면서 써 주는 차용증이에요. 국채 금리는 <mark>나라가 돈을 빌릴 때 내는 이자율</mark>이에요.",
-        "미국 정부는 돈을 떼일 걱정이 거의 없다고 여겨져서, 미국 국채 금리는 '가장 안전하게 받을 수 있는 이자'의 기준이 돼요." ] },
-      { t:"2) 왜 주식에 영향을 줄까요", items:[
+        "미국 정부는 돈을 떼일 걱정이 거의 없다고 여겨져요. 그래서 미국 국채 금리는 가장 안전하게 받을 수 있는 이자의 기준이 돼요.",
+        "만기에 따라 2년물, 10년물, 30년물처럼 종류가 나뉘어요. 뉴스에서 가장 자주 보는 건 10년물이에요." ] },
+      { t:"2) 이 금리는 누가 정하나요?", items:[
+        "누가 정해 주는 숫자가 아니에요. 국채는 시장에서 매일 사고팔리고, 그 거래 가격에 따라 금리가 매일 바뀌어요.",
+        "사려는 사람이 많으면 국채 가격이 오르고 금리는 내려요. 팔려는 사람이 많으면 반대로 가격이 내리고 금리가 올라요." ],
+        box:{ label:"기준금리와는 달라요", text:"기준금리는 중앙은행(미국은 연준)이 회의를 열어 정하는 아주 짧은 기간의 금리예요. 국채 금리는 시장 거래로 정해져요. 10년물 금리에는 앞으로 10년 동안 물가와 경기가 어떨지에 대한 시장의 예상이 담겨 있어요." },
+        arrow:"기준금리는 그대로인데 국채 금리만 오르는 날이 있는 이유예요." },
+      { t:"3) 왜 주식에 영향을 줄까요?", items:[
         "안전한 국채만 사도 연 5% 넘는 이자를 받는다면, 굳이 위험을 지고 주식을 살 이유가 줄어요.",
-        "은행 대출 금리도 국채 금리를 따라 움직여요. 기업은 이자 부담이 커지고, 미래에 벌 돈이 큰 기술주일수록 가치가 더 깎여 보여요." ] },
-      { t:"3) 주의할 점", items:[
+        "은행 대출 금리도 국채 금리를 따라 움직여요. 기업은 이자 부담이 커져요.",
+        "먼 미래에 벌 돈이 큰 기술주일수록 금리가 오를 때 가치가 더 깎여 보여요. 미래의 돈을 오늘 가치로 바꿀 때 금리로 나누기 때문이에요." ] },
+      { t:"4) 요즘은 왜 오르고 있나요?", items:[
+        "물가 걱정이 다시 커졌기 때문이에요. 9월 ISM 서비스업 조사의 지불가격지수가 74로 2022년 7월 이후 가장 높았어요.",
+        "물가가 오르면 나중에 받을 이자의 가치가 줄어요. 그래서 채권을 사는 사람들이 더 높은 이자를 요구해요.",
+        "연준이 금리를 한 번 더 올릴 수 있다는 예상도 금리를 밀어 올려요. 시장은 10월 회의 인상 가능성을 20~25% 정도로 보고 있어요." ] },
+      { t:"5) 우리나라에는 어떤 영향이 있나요?", items:[
+        "미국 금리가 높으면 달러로 된 자산의 매력이 커져요. 외국인 투자자가 한국 같은 시장에서 돈을 빼 가기 쉬워져요.",
+        "달러를 찾는 사람이 늘면 원/달러 환율이 오르는 압력도 생겨요.",
+        "오늘 외국인이 코스피에서 1조 7천억 원 넘게 판 것도 이런 배경에서 볼 수 있어요. 다만 하루의 매도에는 여러 이유가 섞여 있어요." ] },
+      { t:"6) 숫자는 이렇게 읽어요", items:[
         "<mark>채권은 금리와 가격이 반대로 움직여요.</mark> 금리가 올랐다는 건 채권 가격이 내렸다는 뜻이에요.",
-        "금리가 올라도 주가가 오르는 날이 있어요. 5일 미국 증시처럼 실적 기대가 금리 부담보다 클 때예요. 그래서 금리와 실적을 함께 봐야 해요." ] }
+        "금리 변화는 bp(베이시스포인트)로 말해요. 1bp는 0.01%포인트예요. 5.28%에서 5.31%가 되면 3bp 오른 거예요.",
+        "금리가 올라도 주가가 오르는 날이 있어요. 5일 미국 증시처럼 실적 기대가 금리 부담보다 클 때예요." ],
+        box:{ label:"기사에서 볼 세 가지", text:"<b>수준</b>: 지금 몇 %인가요? <b>속도</b>: 며칠 사이에 얼마나 빨리 움직였나요? <b>이유</b>: 물가 때문인가요, 경기 때문인가요? 같은 5%라도 천천히 오른 것과 며칠 만에 뛴 것은 시장이 받는 충격이 달라요." } },
+      { t:"7) 어디서 직접 확인할 수 있나요?", items:[
+        "<b>미국 10년 국채 금리</b>: CNBC 시세 화면에서 실시간으로 볼 수 있어요. <a href='https://www.cnbc.com/quotes/US10Y' target='_blank' rel='noopener'>cnbc.com/quotes/US10Y →</a>",
+        "<b>한국 금리와 환율</b>: 한국은행 경제통계시스템(ECOS)에서 날짜별 숫자를 찾아볼 수 있어요. <a href='https://ecos.bok.or.kr' target='_blank' rel='noopener'>ecos.bok.or.kr →</a>" ],
+        arrow:"금리 숫자를 본 다음에는 그날 주식과 환율이 어떻게 움직였는지 같이 보세요. 금리 → 환율 → 외국인 수급 순서로 보면 흐름이 이어져요." }
     ]
   },
   calendarIntro: "이번 주 국내 증시는 8일(목)까지 열리고 9일(금)은 쉬어요. 시각은 한국 기준이에요.",
@@ -335,6 +366,9 @@ const ISSUES = [
   ],
   sources: [
     ["외국인 일자별 매매동향 10/6 (핀포인트뉴스)","https://www.pinpointnews.co.kr/news/articleView.html?idxno=493131"],
+    ["달러인덱스·금리 인상 가능성 (The Rio Times)","https://www.riotimesonline.com/global-economy-briefing-october-6-2026/"],
+    ["국채금리·ISM 지불가격지수 (파이낸셜뉴스)","https://www.fnnews.com/news/202610060511334960"],
+    ["거래대금·프로그램 매매 (더리포트)","https://www.thereport.co.kr/news/articleView.html?idxno=92027"],
     ["뉴욕증시·유가·금·국채금리 (이투데이)","https://etoday.co.kr/news/view/2632544"],
     ["미국 지수 마감 (AP·야후파이낸스)","https://finance.yahoo.com/markets/world-indices/articles/major-us-stock-indexes-fared-201520824.html"],
     ["미국 종목 등락 (톱스타뉴스)","https://www.topstarnews.net/news/articleView.html?idxno=16238884"],
@@ -515,7 +549,7 @@ const ISSUES = [
   const ps = a => (a||[]).map(t=>`<p>${t}</p>`).join("");
   const won = v => { const a=Math.abs(v), jo=Math.floor(a/10000), eok=a%10000;
     return (v>0?"+":v<0?"−":"") + (jo? jo+"조 ":"") + (eok? eok.toLocaleString("ko-KR")+"억" : (jo?"":"0억")); };
-  const SECTIONS = [["s1","경제지표 · 오늘의 숫자"],["s2","미국 증시 마감"],["s3","한국 증시 마감"],["s4","말타의 한마디"],["s5","주요 뉴스"],["s6","경제 상식 한 조각"],["s7","다가오는 일정"],["s8","오늘의 머니퀴즈"]];
+  const SECTIONS = [["s1","경제지표 · 오늘의 숫자"],["s2","미국 증시 마감"],["s3","한국 증시 마감"],["s4","말타의 한마디"],["s5","주요 뉴스"],["s6","경제 상식 한 조각"],["s7","이번 주 체크포인트"],["s8","오늘의 머니퀴즈"]];
   const h2 = (i,extra) => `<h2><span class="n">${String(i+1).padStart(2,"0")}</span>${SECTIONS[i][1]}${extra?` <span class="small">${extra}</span>`:""}</h2>`;
 
   function heat(list){
@@ -545,7 +579,7 @@ const ISSUES = [
   }
   function closing(c){
     const col=(nm,x)=>`<div><span class="nm">${nm}</span><span class="px ${dir(x.pct)}">${x.v}<small>${arrow(x.pct)} ${x.chg.replace(/^[+-]/,"")} ${sign(x.pct)}</small></span>
-      <dl><dt>개인</dt><dd class="${dir(x.ind)}">${won(x.ind)}원</dd><dt>외국인</dt><dd class="${dir(x.frg)}">${won(x.frg)}원</dd><dt>기관</dt><dd class="${dir(x.inst)}">${won(x.inst)}원</dd></dl>
+      <dl><dt>개인</dt><dd class="${dir(x.ind)}">${won(x.ind)}원</dd><dt>외국인</dt><dd class="${dir(x.frg)}">${won(x.frg)}원</dd><dt>기관</dt><dd class="${dir(x.inst)}">${won(x.inst)}원</dd>${x.prog!=null?`<dt>${x.progLabel||"프로그램"}</dt><dd class="${dir(x.prog)}">${won(x.prog)}원</dd>`:""}${x.vol?`<dt>거래대금</dt><dd>${x.vol}</dd>`:""}</dl>
       ${x.adv!=null?`<span class="brd">상승 ${x.adv} · 하락 ${x.dec}</span>`:""}</div>`;
     return `<div class="sub-block"><h4>오늘 장 마감 숫자</h4><div class="close">${col("코스피",c.kospi)}${col("코스닥",c.kosdaq)}</div>${c.text?`<p>${c.text}</p>`:""}</div>`;
   }
@@ -564,7 +598,7 @@ const ISSUES = [
     <div class="inner">
       <section class="sec" id="s1">${h2(0)}
         ${I.notice?`<p class="notice">${I.notice}</p>`:""}
-        <div class="board">${I.indicators.map(x=>`<div class="tile"><span class="k">${x.k}</span><span class="v">${x.v}</span><span class="c ${dir(x.pct)}">${arrow(x.pct)} ${sign(x.pct).replace(/^[+-]/,"")}</span><span class="d">${x.d}</span></div>`).join("")}</div>
+        <div class="board${I.indicators.length===10?" b10":""}">${I.indicators.map(x=>`<div class="tile"><span class="k">${x.k}</span><span class="v">${x.v}</span><span class="c ${dir(x.pct)}">${arrow(x.pct)} ${sign(x.pct).replace(/^[+-]/,"")}</span><span class="d">${x.d}</span></div>`).join("")}</div>
         ${I.indicatorNotes?`<ul class="notes">${I.indicatorNotes.map(n=>`<li><b>${n.t}</b><span>${n.x}</span></li>`).join("")}</ul>`:""}
         ${I.bigNumber?`<div class="big"><div class="fig ${I.bigNumber.dir}">${I.bigNumber.value}<small>${I.bigNumber.unit}</small></div><div class="txt"><b>${I.bigNumber.title}</b>${I.bigNumber.text}</div></div>`:""}
       </section>
@@ -584,17 +618,19 @@ const ISSUES = [
 
       <section class="sec" id="s4">${h2(3)}
         <p class="quote">“${I.comment.quote}”</p>
+        ${I.comment.intro?`<p>${I.comment.intro}</p>`:""}
         ${(I.comment.points||[]).map(p=>`<div class="pt"><h4>${p.t}</h4>${ps(p.paras)}</div>`).join("")}
       </section>
 
       <section class="sec" id="s5">${h2(4)}
-        <div class="news">${I.news.map(n=>`<article><span class="tag">${n.tag}</span><h3>${n.title}</h3><p>${n.body}</p><p class="why"><b>왜 중요할까요?</b> ${n.why}</p><a class="more" href="${n.url}" target="_blank" rel="noopener">원문 보기 (${n.src}) →</a></article>`).join("")}</div>
+        <div class="news">${I.news.map(n=>`<article><span class="tag">${n.tag}</span><h3>${n.title}</h3><p>${n.body}</p>${n.more?`<p>${n.more}</p>`:""}<p class="why"><b>왜 중요할까요?</b> ${n.why}</p><a class="more" href="${n.url}" target="_blank" rel="noopener">원문 보기 (${n.src}) →</a></article>`).join("")}</div>
       </section>
 
       <section class="sec" id="s6">${h2(5)}<h3>${I.term.name}</h3>
         ${I.term.card?`<div class="tcard"><span class="eyebrow">${I.term.card.eyebrow}</span><div class="tt">${I.term.card.title}</div><span class="ts">${I.term.card.sub}</span><ol class="steps">${I.term.card.steps.map(s=>`<li><b>${s.k}</b>${s.x}</li>`).join("")}</ol></div>`:""}
+        ${I.term.note?`<p class="tip">${I.term.note}</p>`:""}
         ${I.term.intro?`<p>${I.term.intro}</p>`:""}
-        ${(I.term.points||[]).map(p=>`<div class="pt"><h4>${p.t}</h4><ul>${p.items.map(t=>`<li>${t}</li>`).join("")}</ul></div>`).join("")}
+        ${(I.term.points||[]).map(p=>`<div class="pt"><h4>${p.t}</h4><ul>${p.items.map(t=>`<li>${t}</li>`).join("")}</ul>${p.box?`<div class="box"><span class="lb">${p.box.label}</span><p>${p.box.text}</p></div>`:""}${p.arrow?`<p class="arrow">→ ${p.arrow}</p>`:""}</div>`).join("")}
       </section>
 
       <section class="sec" id="s7">${h2(6)}
